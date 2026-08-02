@@ -159,7 +159,9 @@ export function SalesManager({
                 <Label>{t("sales.product")}</Label>
                 <Select value={productId} onValueChange={(v) => setProductId(v ?? "")}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("sales.chooseProduct")} />
+                    <SelectValue placeholder={t("sales.chooseProduct")}>
+                      {(value: string) => products.find((p) => String(p.id) === value)?.name ?? t("sales.chooseProduct")}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {products.map((p) => (
@@ -206,7 +208,7 @@ export function SalesManager({
                   <Label>{t("sales.payment")}</Label>
                   <Select value={payment} onValueChange={(v) => setPayment(v ?? PAYMENT_METHODS[0])}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue>{(value: string) => tPayment(value)}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {PAYMENT_METHODS.map((m) => (

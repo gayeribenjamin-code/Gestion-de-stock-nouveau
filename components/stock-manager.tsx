@@ -180,7 +180,9 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
         </div>
         <Select value={category} onValueChange={(v) => setCategory(v ?? "all")}>
           <SelectTrigger className="sm:w-56">
-            <SelectValue placeholder={t("stock.category")} />
+            <SelectValue placeholder={t("stock.category")}>
+              {(value: string) => (value === "all" ? t("stock.allCategories") : tCategory(value))}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("stock.allCategories")}</SelectItem>
@@ -376,7 +378,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                 <Label>{t("stock.category")}</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v ?? CATEGORIES[0] })}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue>{(value: string) => tCategory(value)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map((c) => (
@@ -394,7 +396,13 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                   onValueChange={(v) => setForm({ ...form, supplierId: !v || v === "none" ? null : Number(v) })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("common.none")} />
+                    <SelectValue placeholder={t("common.none")}>
+                      {(value: string) =>
+                        value === "none"
+                          ? t("common.none")
+                          : (suppliers.find((s) => String(s.id) === value)?.name ?? t("common.none"))
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{t("common.none")}</SelectItem>
