@@ -1,0 +1,16 @@
+{
+  "name": "TéléStock — Gestion Boutique Télécom",
+  "short_name": "TéléStock",
+  "description": "Classeur Excel professionnel et automatisé pour la gestion d'une boutique de télécommunications.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
