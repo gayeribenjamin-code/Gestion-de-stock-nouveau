@@ -10,7 +10,8 @@ import {
   type ProductRow,
   type ProductInput,
 } from "@/app/actions/products"
-import { CATEGORIES, STATUS_LABEL, formatCurrency, stockStatus } from "@/lib/helpers"
+import { CATEGORIES, stockStatus } from "@/lib/helpers"
+import { usePreferences } from "@/components/preferences-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -49,20 +50,29 @@ const emptyForm: ProductInput = {
 }
 
 function StatusBadge({ quantity, threshold }: { quantity: number; threshold: number }) {
+  const { t } = usePreferences()
   const status = stockStatus(quantity, threshold)
-  if (status === "out_of_stock") return <Badge variant="destructive">{STATUS_LABEL[status]}</Badge>
+  const label = t(`status.${status}`)
+  if (status === "out_of_stock") return <Badge variant="destructive">{label}</Badge>
   if (status === "low_stock")
-    return <Badge className="bg-chart-4/15 text-chart-4 hover:bg-chart-4/15">{STATUS_LABEL[status]}</Badge>
-  return <Badge className="bg-chart-3/15 text-chart-3 hover:bg-chart-3/15">{STATUS_LABEL[status]}</Badge>
+    return <Badge className="bg-chart-4/15 text-chart-4 hover:bg-chart-4/15">{label}</Badge>
+  return <Badge className="bg-chart-3/15 text-chart-3 hover:bg-chart-3/15">{label}</Badge>
 }
 
 export function StockManager({ products, suppliers }: { products: ProductRow[]; suppliers: Supplier[] }) {
+  const { t, money, formatRawMoney, tCategory, symbol, decimals, fromBase, toBase } = usePreferences()
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<string>("all")
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<ProductRow | null>(null)
   const [form, setForm] = useState<ProductInput>(emptyForm)
   const [saving, setSaving] = useState(false)
+
+  // Les prix du formulaire sont saisis dans la devise active ; la base est en euros.
+  const roundToCur = (eur: number) => {
+    const v = fromBase(eur)
+    return decimals === 0 ? Math.round(v) : Math.round(v * 100) / 100
+  }
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -90,8 +100,8 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
       category: p.category,
       brand: p.brand ?? "",
       supplierId: p.supplierId,
-      purchasePrice: p.purchasePrice,
-      salePrice: p.salePrice,
+      purchasePrice: roundToCur(p.purchasePrice),
+      salePrice: roundToCur(p.salePrice),
       quantity: p.quantity,
       reorderThreshold: p.reorderThreshold,
     })
@@ -100,33 +110,39 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
 
   async function handleSave() {
     if (!form.name.trim() || !form.sku.trim()) {
-      toast.error("Le nom et la référence (SKU) sont obligatoires.")
+      toast.error(t("stock.skuRequired"))
       return
     }
     setSaving(true)
+    // Reconversion des prix (devise active -> euros) avant enregistrement.
+    const payload: ProductInput = {
+      ...form,
+      purchasePrice: toBase(form.purchasePrice),
+      salePrice: toBase(form.salePrice),
+    }
     try {
       if (editing) {
-        await updateProduct(editing.id, form)
-        toast.success("Produit mis à jour.")
+        await updateProduct(editing.id, payload)
+        toast.success(t("stock.productUpdated"))
       } else {
-        await createProduct(form)
-        toast.success("Produit ajouté.")
+        await createProduct(payload)
+        toast.success(t("stock.productAdded"))
       }
       setOpen(false)
     } catch {
-      toast.error("Une erreur est survenue.")
+      toast.error(t("common.error"))
     } finally {
       setSaving(false)
     }
   }
 
   async function handleDelete(p: ProductRow) {
-    if (!confirm(`Supprimer « ${p.name} » ?`)) return
+    if (!confirm(t("stock.confirmDelete", { v: p.name }))) return
     try {
       await deleteProduct(p.id)
-      toast.success("Produit supprimé.")
+      toast.success(t("stock.productDeleted"))
     } catch {
-      toast.error("Suppression impossible.")
+      toast.error(t("stock.deleteError"))
     }
   }
 
@@ -134,7 +150,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
     try {
       await adjustStock(p.id, delta)
     } catch {
-      toast.error("Ajustement impossible.")
+      toast.error(t("stock.adjustError"))
     }
   }
 
@@ -144,13 +160,11 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-bold text-foreground">Stock produits</h1>
-          <p className="text-sm text-muted-foreground">
-            {products.length} référence(s) — statut calculé automatiquement.
-          </p>
+          <h1 className="font-heading text-2xl font-bold text-foreground">{t("stock.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("stock.subtitle", { v: products.length })}</p>
         </div>
         <Button onClick={openCreate} className="gap-2">
-          <Plus className="size-4" /> Ajouter un produit
+          <Plus className="size-4" /> {t("stock.addProduct")}
         </Button>
       </div>
 
@@ -160,19 +174,19 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher par nom, SKU ou marque…"
+            placeholder={t("stock.search")}
             className="pl-9 text-base"
           />
         </div>
         <Select value={category} onValueChange={(v) => setCategory(v ?? "all")}>
           <SelectTrigger className="sm:w-56">
-            <SelectValue placeholder="Catégorie" />
+            <SelectValue placeholder={t("stock.category")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Toutes les catégories</SelectItem>
+            <SelectItem value="all">{t("stock.allCategories")}</SelectItem>
             {CATEGORIES.map((c) => (
               <SelectItem key={c} value={c}>
-                {c}
+                {tCategory(c)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -185,21 +199,21 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Produit</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead className="text-right">Achat</TableHead>
-                <TableHead className="text-right">Vente</TableHead>
-                <TableHead className="text-right">Marge</TableHead>
-                <TableHead className="text-center">Stock</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t("stock.colProduct")}</TableHead>
+                <TableHead>{t("stock.category")}</TableHead>
+                <TableHead className="text-right">{t("stock.colPurchase")}</TableHead>
+                <TableHead className="text-right">{t("stock.colSale")}</TableHead>
+                <TableHead className="text-right">{t("stock.colMargin")}</TableHead>
+                <TableHead className="text-center">{t("stock.colStock")}</TableHead>
+                <TableHead>{t("stock.colStatus")}</TableHead>
+                <TableHead className="text-right">{t("stock.colActions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
-                    Aucun produit trouvé.
+                    {t("stock.noProducts")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -215,9 +229,9 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                           {p.supplierName ? ` · ${p.supplierName}` : ""}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.category}</TableCell>
-                      <TableCell className="text-right text-sm">{formatCurrency(p.purchasePrice)}</TableCell>
-                      <TableCell className="text-right text-sm font-medium">{formatCurrency(p.salePrice)}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{tCategory(p.category)}</TableCell>
+                      <TableCell className="text-right text-sm">{money(p.purchasePrice)}</TableCell>
+                      <TableCell className="text-right text-sm font-medium">{money(p.salePrice)}</TableCell>
                       <TableCell className="text-right text-sm text-chart-3">{m.toFixed(0)}%</TableCell>
                       <TableCell>
                         <div className="flex items-center justify-center gap-1">
@@ -226,7 +240,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                             size="icon"
                             className="size-7"
                             onClick={() => handleAdjust(p, -1)}
-                            aria-label="Diminuer le stock"
+                            aria-label={t("stock.decreaseStock")}
                           >
                             <Minus className="size-3.5" />
                           </Button>
@@ -236,7 +250,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                             size="icon"
                             className="size-7"
                             onClick={() => handleAdjust(p, 1)}
-                            aria-label="Augmenter le stock"
+                            aria-label={t("stock.increaseStock")}
                           >
                             <Plus className="size-3.5" />
                           </Button>
@@ -272,7 +286,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
       {/* Vue mobile : cartes */}
       <div className="flex flex-col gap-3 md:hidden">
         {filtered.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Aucun produit trouvé.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("stock.noProducts")}</p>
         ) : (
           filtered.map((p) => (
             <Card key={p.id}>
@@ -288,7 +302,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                   <StatusBadge quantity={p.quantity} threshold={p.reorderThreshold} />
                 </div>
                 <div className="mt-3 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{formatCurrency(p.salePrice)}</span>
+                  <span className="text-muted-foreground">{money(p.salePrice)}</span>
                   <div className="flex items-center gap-1">
                     <Button variant="outline" size="icon" className="size-8" onClick={() => handleAdjust(p, -1)}>
                       <Minus className="size-4" />
@@ -301,7 +315,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                 </div>
                 <div className="mt-3 flex gap-2">
                   <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => openEdit(p)}>
-                    <Pencil className="size-3.5" /> Modifier
+                    <Pencil className="size-3.5" /> {t("common.edit")}
                   </Button>
                   <Button
                     variant="outline"
@@ -321,14 +335,16 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-heading">{editing ? "Modifier le produit" : "Nouveau produit"}</DialogTitle>
-            <DialogDescription>Les prix et le stock alimentent le tableau de bord automatiquement.</DialogDescription>
+            <DialogTitle className="font-heading">
+              {editing ? t("stock.editProduct") : t("stock.newProduct")}
+            </DialogTitle>
+            <DialogDescription>{t("stock.dialogDesc")}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="sku">Référence (SKU)</Label>
+                <Label htmlFor="sku">{t("stock.sku")}</Label>
                 <Input
                   id="sku"
                   value={form.sku}
@@ -337,7 +353,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="brand">Marque</Label>
+                <Label htmlFor="brand">{t("stock.brand")}</Label>
                 <Input
                   id="brand"
                   value={form.brand}
@@ -347,7 +363,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Nom du produit</Label>
+              <Label htmlFor="name">{t("stock.productName")}</Label>
               <Input
                 id="name"
                 value={form.name}
@@ -357,7 +373,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label>Catégorie</Label>
+                <Label>{t("stock.category")}</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v ?? CATEGORIES[0] })}>
                   <SelectTrigger>
                     <SelectValue />
@@ -365,23 +381,23 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                   <SelectContent>
                     {CATEGORIES.map((c) => (
                       <SelectItem key={c} value={c}>
-                        {c}
+                        {tCategory(c)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex flex-col gap-2">
-                <Label>Fournisseur</Label>
+                <Label>{t("stock.supplier")}</Label>
                 <Select
                   value={form.supplierId ? String(form.supplierId) : "none"}
                   onValueChange={(v) => setForm({ ...form, supplierId: !v || v === "none" ? null : Number(v) })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Aucun" />
+                    <SelectValue placeholder={t("common.none")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Aucun</SelectItem>
+                    <SelectItem value="none">{t("common.none")}</SelectItem>
                     {suppliers.map((s) => (
                       <SelectItem key={s.id} value={String(s.id)}>
                         {s.name}
@@ -393,24 +409,28 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="purchase">Prix d&apos;achat (€)</Label>
+                <Label htmlFor="purchase">
+                  {t("stock.purchasePrice")} ({symbol})
+                </Label>
                 <Input
                   id="purchase"
                   type="number"
                   inputMode="decimal"
-                  step="0.01"
+                  step={decimals === 0 ? "1" : "0.01"}
                   value={form.purchasePrice}
                   onChange={(e) => setForm({ ...form, purchasePrice: Number(e.target.value) })}
                   className="text-base"
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="sale">Prix de vente (€)</Label>
+                <Label htmlFor="sale">
+                  {t("stock.salePrice")} ({symbol})
+                </Label>
                 <Input
                   id="sale"
                   type="number"
                   inputMode="decimal"
-                  step="0.01"
+                  step={decimals === 0 ? "1" : "0.01"}
                   value={form.salePrice}
                   onChange={(e) => setForm({ ...form, salePrice: Number(e.target.value) })}
                   className="text-base"
@@ -418,12 +438,12 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Marge calculée : <span className="font-semibold text-chart-3">{margin.toFixed(1)}%</span> (
-              {formatCurrency(form.salePrice - form.purchasePrice)} / unité)
+              {t("stock.marginCalc")} <span className="font-semibold text-chart-3">{margin.toFixed(1)}%</span> (
+              {formatRawMoney(form.salePrice - form.purchasePrice)} {t("stock.perUnit")})
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="qty">Quantité en stock</Label>
+                <Label htmlFor="qty">{t("stock.quantity")}</Label>
                 <Input
                   id="qty"
                   type="number"
@@ -434,7 +454,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="threshold">Seuil d&apos;alerte</Label>
+                <Label htmlFor="threshold">{t("stock.threshold")}</Label>
                 <Input
                   id="threshold"
                   type="number"
@@ -449,10 +469,10 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleSave} disabled={saving}>
-              {editing ? "Enregistrer" : "Ajouter"}
+              {editing ? t("common.save") : t("common.add")}
             </Button>
           </DialogFooter>
         </DialogContent>

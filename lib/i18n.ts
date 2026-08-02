@@ -21,6 +21,11 @@ const fr: Dict = {
   "nav.suppliers": "Fournisseurs",
   "nav.stats": "Statistiques",
   "nav.signOut": "Se déconnecter",
+  "nav.short.dashboard": "Accueil",
+  "nav.short.stock": "Stock",
+  "nav.short.sales": "Ventes",
+  "nav.short.suppliers": "Fourn.",
+  "nav.short.stats": "Stats",
   // Préférences
   "prefs.title": "Préférences",
   "prefs.language": "Langue",
@@ -184,6 +189,11 @@ const en: Dict = {
   "nav.suppliers": "Suppliers",
   "nav.stats": "Statistics",
   "nav.signOut": "Sign out",
+  "nav.short.dashboard": "Home",
+  "nav.short.stock": "Stock",
+  "nav.short.sales": "Sales",
+  "nav.short.suppliers": "Suppl.",
+  "nav.short.stats": "Stats",
   // Preferences
   "prefs.title": "Preferences",
   "prefs.language": "Language",

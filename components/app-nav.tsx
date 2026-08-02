@@ -4,20 +4,23 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { usePreferences } from "@/components/preferences-provider"
+import { PreferencesMenu } from "@/components/preferences-menu"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard, Package, ShoppingCart, Truck, BarChart3, Smartphone, LogOut } from "lucide-react"
 
 const links = [
-  { href: "/", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/stock", label: "Stock", icon: Package },
-  { href: "/ventes", label: "Ventes", icon: ShoppingCart },
-  { href: "/fournisseurs", label: "Fournisseurs", icon: Truck },
-  { href: "/statistiques", label: "Statistiques", icon: BarChart3 },
+  { href: "/", key: "nav.dashboard", shortKey: "nav.short.dashboard", icon: LayoutDashboard },
+  { href: "/stock", key: "nav.stock", shortKey: "nav.short.stock", icon: Package },
+  { href: "/ventes", key: "nav.sales", shortKey: "nav.short.sales", icon: ShoppingCart },
+  { href: "/fournisseurs", key: "nav.suppliers", shortKey: "nav.short.suppliers", icon: Truck },
+  { href: "/statistiques", key: "nav.stats", shortKey: "nav.short.stats", icon: BarChart3 },
 ]
 
 export function DesktopNav({ shopName }: { shopName: string }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { t } = usePreferences()
 
   async function signOut() {
     await authClient.signOut()
@@ -52,22 +55,26 @@ export function DesktopNav({ shopName }: { shopName: string }) {
               )}
             >
               <link.icon className="size-4.5" />
-              {link.label}
+              {t(link.key)}
             </Link>
           )
         })}
       </nav>
 
-      <Button variant="ghost" onClick={signOut} className="justify-start gap-3 text-muted-foreground">
-        <LogOut className="size-4.5" />
-        Se déconnecter
-      </Button>
+      <div className="flex flex-col gap-1">
+        <PreferencesMenu variant="sidebar" />
+        <Button variant="ghost" onClick={signOut} className="justify-start gap-3 text-muted-foreground">
+          <LogOut className="size-4.5" />
+          {t("nav.signOut")}
+        </Button>
+      </div>
     </aside>
   )
 }
 
 export function MobileNav() {
   const pathname = usePathname()
+  const { t } = usePreferences()
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex items-stretch border-t border-border bg-card md:hidden">
       {links.map((link) => {
@@ -82,7 +89,7 @@ export function MobileNav() {
             )}
           >
             <link.icon className="size-5" />
-            <span className="leading-none">{link.label.split(" ")[0]}</span>
+            <span className="leading-none">{t(link.shortKey)}</span>
           </Link>
         )
       })}
@@ -92,6 +99,7 @@ export function MobileNav() {
 
 export function MobileHeader({ shopName }: { shopName: string }) {
   const router = useRouter()
+  const { t } = usePreferences()
   async function signOut() {
     await authClient.signOut()
     router.push("/sign-in")
@@ -108,9 +116,12 @@ export function MobileHeader({ shopName }: { shopName: string }) {
           <p className="truncate text-xs text-muted-foreground">{shopName}</p>
         </div>
       </div>
-      <Button variant="ghost" size="icon" onClick={signOut} aria-label="Se déconnecter">
-        <LogOut className="size-5" />
-      </Button>
+      <div className="flex items-center gap-1">
+        <PreferencesMenu variant="icon" />
+        <Button variant="ghost" size="icon" onClick={signOut} aria-label={t("nav.signOut")}>
+          <LogOut className="size-5" />
+        </Button>
+      </div>
     </header>
   )
 }

@@ -3,25 +3,29 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { formatCurrency } from "@/lib/helpers"
+import { usePreferences } from "@/components/preferences-provider"
 
 export function RevenueChart({ data }: { data: { day: string; revenue: number }[] }) {
+  const { t, lang, fromBase, formatRawMoney } = usePreferences()
   const chartData = data.map((d) => ({
-    ...d,
-    label: new Date(d.day).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+    label: new Date(d.day).toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+    }),
+    revenue: fromBase(d.revenue),
   }))
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-base">Chiffre d&apos;affaires (14 derniers jours)</CardTitle>
+        <CardTitle className="font-heading text-base">{t("chart.revenue14")}</CardTitle>
       </CardHeader>
       <CardContent>
         {chartData.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Aucune vente enregistrée pour l&apos;instant.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("chart.noSales")}</p>
         ) : (
           <ChartContainer
-            config={{ revenue: { label: "CA", color: "var(--chart-1)" } }}
+            config={{ revenue: { label: t("chart.revShort"), color: "var(--chart-1)" } }}
             className="aspect-auto h-64 w-full"
           >
             <AreaChart data={chartData} margin={{ left: 4, right: 8, top: 8 }}>
@@ -33,10 +37,8 @@ export function RevenueChart({ data }: { data: { day: string; revenue: number }[
               </defs>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} fontSize={11} />
-              <YAxis tickLine={false} axisLine={false} width={44} fontSize={11} />
-              <ChartTooltip
-                content={<ChartTooltipContent formatter={(v) => formatCurrency(Number(v))} />}
-              />
+              <YAxis tickLine={false} axisLine={false} width={56} fontSize={11} />
+              <ChartTooltip content={<ChartTooltipContent formatter={(v) => formatRawMoney(Number(v))} />} />
               <Area
                 dataKey="revenue"
                 type="monotone"
@@ -53,20 +55,26 @@ export function RevenueChart({ data }: { data: { day: string; revenue: number }[
 }
 
 export function CategoryChart({ data }: { data: { category: string; revenue: number }[] }) {
+  const { t, tCategory, fromBase, formatRawMoney } = usePreferences()
+  const chartData = data.map((d) => ({
+    category: tCategory(d.category),
+    revenue: fromBase(d.revenue),
+  }))
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-base">CA par catégorie</CardTitle>
+        <CardTitle className="font-heading text-base">{t("chart.revByCategory")}</CardTitle>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Aucune donnée à afficher.</p>
+        {chartData.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("chart.noData")}</p>
         ) : (
           <ChartContainer
-            config={{ revenue: { label: "CA", color: "var(--chart-2)" } }}
+            config={{ revenue: { label: t("chart.revShort"), color: "var(--chart-2)" } }}
             className="aspect-auto h-64 w-full"
           >
-            <BarChart data={data} layout="vertical" margin={{ left: 8, right: 8 }}>
+            <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 8 }}>
               <CartesianGrid horizontal={false} strokeDasharray="3 3" />
               <XAxis type="number" tickLine={false} axisLine={false} fontSize={11} />
               <YAxis
@@ -77,7 +85,7 @@ export function CategoryChart({ data }: { data: { category: string; revenue: num
                 width={110}
                 fontSize={11}
               />
-              <ChartTooltip content={<ChartTooltipContent formatter={(v) => formatCurrency(Number(v))} />} />
+              <ChartTooltip content={<ChartTooltipContent formatter={(v) => formatRawMoney(Number(v))} />} />
               <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ChartContainer>

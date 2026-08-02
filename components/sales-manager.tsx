@@ -31,7 +31,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { formatCurrency, formatDate, PAYMENT_METHODS } from "@/lib/helpers"
+import { PAYMENT_METHODS } from "@/lib/helpers"
+import { usePreferences } from "@/components/preferences-provider"
 import { createSale, deleteSale, type SaleRow } from "@/app/actions/sales"
 import type { ProductRow } from "@/app/actions/products"
 
@@ -42,6 +43,7 @@ export function SalesManager({
   sales: SaleRow[]
   products: ProductRow[]
 }) {
+  const { t, money, formatDate, tPayment } = usePreferences()
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -78,16 +80,16 @@ export function SalesManager({
 
   async function onSubmit() {
     if (!selectedProduct) {
-      toast.error("Sélectionnez un produit.")
+      toast.error(t("sales.selectProduct"))
       return
     }
     const qty = Number.parseInt(quantity, 10)
     if (!Number.isInteger(qty) || qty <= 0) {
-      toast.error("Quantité invalide.")
+      toast.error(t("sales.invalidQty"))
       return
     }
     if (qty > selectedProduct.quantity) {
-      toast.error(`Stock insuffisant : ${selectedProduct.quantity} en stock.`)
+      toast.error(t("sales.insufficientStock", { v: selectedProduct.quantity }))
       return
     }
     setSaving(true)
@@ -98,11 +100,11 @@ export function SalesManager({
         customerName: customer.trim() || undefined,
         paymentMethod: payment,
       })
-      toast.success("Vente enregistrée. Stock mis à jour.")
+      toast.success(t("sales.recorded"))
       setOpen(false)
       resetForm()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Impossible d'enregistrer la vente.")
+      toast.error(err instanceof Error ? err.message : t("sales.recordError"))
     } finally {
       setSaving(false)
     }
@@ -111,9 +113,9 @@ export function SalesManager({
   async function onDelete(id: number) {
     try {
       await deleteSale(id)
-      toast.success("Vente supprimée. Stock restauré.")
+      toast.success(t("sales.deleted"))
     } catch {
-      toast.error("Suppression impossible.")
+      toast.error(t("sales.deleteError"))
     }
   }
 
@@ -129,9 +131,9 @@ export function SalesManager({
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher une vente..."
+            placeholder={t("sales.search")}
             className="pl-9"
-            aria-label="Rechercher une vente"
+            aria-label={t("sales.search")}
           />
         </div>
 
@@ -146,23 +148,24 @@ export function SalesManager({
             render={<Button className="gap-2" disabled={products.length === 0} />}
           >
             <Plus className="size-4" />
-            Nouvelle vente
+            {t("sales.newSale")}
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Enregistrer une vente</DialogTitle>
+              <DialogTitle>{t("sales.recordSale")}</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <Label>Produit</Label>
+                <Label>{t("sales.product")}</Label>
                 <Select value={productId} onValueChange={(v) => setProductId(v ?? "")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choisir un produit" />
+                    <SelectValue placeholder={t("sales.chooseProduct")} />
                   </SelectTrigger>
                   <SelectContent>
                     {products.map((p) => (
                       <SelectItem key={p.id} value={String(p.id)} disabled={p.quantity <= 0}>
-                        {p.name} — {p.quantity > 0 ? `${p.quantity} en stock` : "Rupture"}
+                        {p.name} —{" "}
+                        {p.quantity > 0 ? `${p.quantity} ${t("common.inStock")}` : t("status.out_of_stock")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -171,7 +174,7 @@ export function SalesManager({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="qty">Quantité</Label>
+                  <Label htmlFor="qty">{t("sales.quantity")}</Label>
                   <Input
                     id="qty"
                     type="number"
@@ -182,25 +185,25 @@ export function SalesManager({
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Prix unitaire</Label>
+                  <Label>{t("sales.unitPrice")}</Label>
                   <div className="flex h-9 items-center rounded-md border border-input bg-muted px-3 text-sm">
-                    {selectedProduct ? formatCurrency(selectedProduct.salePrice) : "—"}
+                    {selectedProduct ? money(selectedProduct.salePrice) : "—"}
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="customer">Client (optionnel)</Label>
+                  <Label htmlFor="customer">{t("sales.customer")}</Label>
                   <Input
                     id="customer"
                     value={customer}
                     onChange={(e) => setCustomer(e.target.value)}
-                    placeholder="Nom du client"
+                    placeholder={t("sales.customerName")}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Paiement</Label>
+                  <Label>{t("sales.payment")}</Label>
                   <Select value={payment} onValueChange={(v) => setPayment(v ?? PAYMENT_METHODS[0])}>
                     <SelectTrigger>
                       <SelectValue />
@@ -208,7 +211,7 @@ export function SalesManager({
                     <SelectContent>
                       {PAYMENT_METHODS.map((m) => (
                         <SelectItem key={m} value={m}>
-                          {m}
+                          {tPayment(m)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -219,18 +222,18 @@ export function SalesManager({
               {selectedProduct && (
                 <div className="rounded-lg bg-muted p-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total de la vente</span>
-                    <span className="font-semibold">{formatCurrency(previewTotal)}</span>
+                    <span className="text-muted-foreground">{t("sales.saleTotal")}</span>
+                    <span className="font-semibold">{money(previewTotal)}</span>
                   </div>
                 </div>
               )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
-                Annuler
+                {t("common.cancel")}
               </Button>
               <Button onClick={onSubmit} disabled={saving}>
-                {saving ? "Enregistrement..." : "Enregistrer"}
+                {saving ? t("common.saving") : t("common.save")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -240,16 +243,14 @@ export function SalesManager({
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Chiffre d'affaires</p>
-            <p className="mt-1 text-xl font-semibold sm:text-2xl">{formatCurrency(totalRevenue)}</p>
+            <p className="text-sm text-muted-foreground">{t("sales.revenue")}</p>
+            <p className="mt-1 text-xl font-semibold sm:text-2xl">{money(totalRevenue)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Bénéfice</p>
-            <p className="mt-1 text-xl font-semibold text-chart-3 sm:text-2xl">
-              {formatCurrency(totalProfit)}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("sales.profit")}</p>
+            <p className="mt-1 text-xl font-semibold text-chart-3 sm:text-2xl">{money(totalProfit)}</p>
           </CardContent>
         </Card>
       </div>
@@ -260,13 +261,13 @@ export function SalesManager({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Produit</TableHead>
-                  <TableHead className="text-right">Qté</TableHead>
-                  <TableHead className="text-right">Prix U.</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Paiement</TableHead>
+                  <TableHead>{t("sales.colDate")}</TableHead>
+                  <TableHead>{t("sales.product")}</TableHead>
+                  <TableHead className="text-right">{t("sales.colQty")}</TableHead>
+                  <TableHead className="text-right">{t("sales.colUnitPrice")}</TableHead>
+                  <TableHead className="text-right">{t("sales.colTotal")}</TableHead>
+                  <TableHead>{t("sales.colCustomer")}</TableHead>
+                  <TableHead>{t("sales.colPayment")}</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
@@ -276,7 +277,7 @@ export function SalesManager({
                     <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                       <div className="flex flex-col items-center gap-2">
                         <ShoppingCart className="size-8 opacity-40" />
-                        Aucune vente pour le moment.
+                        {t("sales.noSales")}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -288,13 +289,13 @@ export function SalesManager({
                       </TableCell>
                       <TableCell className="font-medium">{s.productName}</TableCell>
                       <TableCell className="text-right">{s.quantity}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(s.unitSalePrice)}</TableCell>
+                      <TableCell className="text-right">{money(s.unitSalePrice)}</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {formatCurrency(s.unitSalePrice * s.quantity)}
+                        {money(s.unitSalePrice * s.quantity)}
                       </TableCell>
                       <TableCell>{s.customerName || "—"}</TableCell>
                       <TableCell>
-                        {s.paymentMethod ? <Badge variant="secondary">{s.paymentMethod}</Badge> : "—"}
+                        {s.paymentMethod ? <Badge variant="secondary">{tPayment(s.paymentMethod)}</Badge> : "—"}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -302,7 +303,7 @@ export function SalesManager({
                           size="icon"
                           className="size-8 text-muted-foreground hover:text-destructive"
                           onClick={() => onDelete(s.id)}
-                          aria-label={`Supprimer la vente de ${s.productName}`}
+                          aria-label={t("sales.deleteSaleOf", { v: s.productName })}
                         >
                           <Trash2 className="size-4" />
                         </Button>

@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { usePreferences } from "@/components/preferences-provider"
 import {
   createSupplier,
   updateSupplier,
@@ -43,6 +44,7 @@ const emptyForm: SupplierInput = {
 }
 
 export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[] }) {
+  const { t } = usePreferences()
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<SupplierWithCount | null>(null)
@@ -81,21 +83,21 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
 
   async function onSubmit() {
     if (!form.name.trim()) {
-      toast.error("Le nom du fournisseur est requis.")
+      toast.error(t("sup.nameRequired"))
       return
     }
     setSaving(true)
     try {
       if (editing) {
         await updateSupplier(editing.id, form)
-        toast.success("Fournisseur mis à jour.")
+        toast.success(t("sup.updated"))
       } else {
         await createSupplier(form)
-        toast.success("Fournisseur ajouté.")
+        toast.success(t("sup.added"))
       }
       setOpen(false)
     } catch {
-      toast.error("Enregistrement impossible.")
+      toast.error(t("sup.saveError"))
     } finally {
       setSaving(false)
     }
@@ -104,9 +106,9 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
   async function onDelete(s: SupplierWithCount) {
     try {
       await deleteSupplier(s.id)
-      toast.success("Fournisseur supprimé.")
+      toast.success(t("sup.deleted"))
     } catch {
-      toast.error("Suppression impossible.")
+      toast.error(t("sup.deleteError"))
     }
   }
 
@@ -118,14 +120,14 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher un fournisseur..."
+            placeholder={t("sup.search")}
             className="pl-9"
-            aria-label="Rechercher un fournisseur"
+            aria-label={t("sup.search")}
           />
         </div>
         <Button className="gap-2" onClick={openCreate}>
           <Plus className="size-4" />
-          Nouveau fournisseur
+          {t("sup.newSupplier")}
         </Button>
       </div>
 
@@ -133,7 +135,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
         <Card>
           <CardContent className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
             <Truck className="size-8 opacity-40" />
-            Aucun fournisseur.
+            {t("sup.none")}
           </CardContent>
         </Card>
       ) : (
@@ -185,14 +187,14 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
                 <div className="mt-auto flex gap-2 pt-2">
                   <Button variant="outline" size="sm" className="flex-1 gap-1.5" onClick={() => openEdit(s)}>
                     <Pencil className="size-3.5" />
-                    Modifier
+                    {t("common.edit")}
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="text-muted-foreground hover:text-destructive"
                     onClick={() => onDelete(s)}
-                    aria-label={`Supprimer ${s.name}`}
+                    aria-label={t("sup.deleteSupplier", { v: s.name })}
                   >
                     <Trash2 className="size-4" />
                   </Button>
@@ -206,11 +208,11 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Modifier le fournisseur" : "Nouveau fournisseur"}</DialogTitle>
+            <DialogTitle>{editing ? t("sup.editSupplier") : t("sup.newSupplier")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Nom *</Label>
+              <Label htmlFor="name">{t("sup.name")} *</Label>
               <Input
                 id="name"
                 value={form.name}
@@ -220,7 +222,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="contact">Contact</Label>
+                <Label htmlFor="contact">{t("sup.contact")}</Label>
                 <Input
                   id="contact"
                   value={form.contactName}
@@ -228,7 +230,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="phone">Téléphone</Label>
+                <Label htmlFor="phone">{t("sup.phone")}</Label>
                 <Input
                   id="phone"
                   value={form.phone}
@@ -237,7 +239,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("sup.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -246,7 +248,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="address">Adresse</Label>
+              <Label htmlFor="address">{t("sup.address")}</Label>
               <Input
                 id="address"
                 value={form.address}
@@ -254,7 +256,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t("sup.notes")}</Label>
               <Input
                 id="notes"
                 value={form.notes}
@@ -264,10 +266,10 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierWithCount[]
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button onClick={onSubmit} disabled={saving}>
-              {saving ? "Enregistrement..." : editing ? "Mettre à jour" : "Ajouter"}
+              {saving ? t("common.saving") : editing ? t("common.update") : t("common.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
