@@ -1,0 +1,399 @@
+export type Lang = "fr" | "en"
+
+export const DEFAULT_LANG: Lang = "fr"
+
+export const LANGS: { code: Lang; label: string }[] = [
+  { code: "fr", label: "Français" },
+  { code: "en", label: "English" },
+]
+
+export function isLang(v: string | undefined | null): v is Lang {
+  return v === "fr" || v === "en"
+}
+
+type Dict = Record<string, string>
+
+const fr: Dict = {
+  // Navigation
+  "nav.dashboard": "Tableau de bord",
+  "nav.stock": "Stock",
+  "nav.sales": "Ventes",
+  "nav.suppliers": "Fournisseurs",
+  "nav.stats": "Statistiques",
+  "nav.signOut": "Se déconnecter",
+  // Préférences
+  "prefs.title": "Préférences",
+  "prefs.language": "Langue",
+  "prefs.currency": "Devise",
+  "prefs.close": "Fermer",
+  "prefs.hint": "La devise convertit automatiquement tous les montants (base : euro).",
+  // Commun
+  "common.inStock": "en stock",
+  "common.cancel": "Annuler",
+  "common.save": "Enregistrer",
+  "common.add": "Ajouter",
+  "common.update": "Mettre à jour",
+  "common.edit": "Modifier",
+  "common.saving": "Enregistrement...",
+  "common.none": "Aucun",
+  "common.error": "Une erreur est survenue.",
+  // Statuts de stock
+  "status.in_stock": "Disponible",
+  "status.low_stock": "Stock faible",
+  "status.out_of_stock": "Rupture",
+  // Tableau de bord
+  "dash.title": "Tableau de bord",
+  "dash.subtitle": "Vue d'ensemble de votre activité, mise à jour en temps réel.",
+  "dash.revenue": "Chiffre d'affaires",
+  "dash.profit": "Bénéfice",
+  "dash.avgMargin": "Marge moyenne {v}%",
+  "dash.sales": "Ventes",
+  "dash.unitsSoldHint": "{v} unités vendues",
+  "dash.stockValue": "Valeur du stock",
+  "dash.references": "{v} références",
+  "dash.catalogProducts": "Produits en catalogue",
+  "dash.lowStock": "Stock faible",
+  "dash.outOfStock": "Ruptures",
+  "dash.unitsSold": "Unités vendues",
+  "dash.topProducts": "Produits les plus vendus",
+  "dash.noSalesYet": "Aucune vente pour l'instant.",
+  "dash.toRestock": "À réapprovisionner",
+  "dash.manage": "Gérer",
+  "dash.wellStocked": "Tout est bien approvisionné.",
+  "dash.unitsShort": "u.",
+  // Graphiques
+  "chart.revenue14": "Chiffre d'affaires (14 derniers jours)",
+  "chart.noSales": "Aucune vente enregistrée pour l'instant.",
+  "chart.revByCategory": "CA par catégorie",
+  "chart.noData": "Aucune donnée à afficher.",
+  "chart.revShort": "CA",
+  // Stock
+  "stock.title": "Stock produits",
+  "stock.subtitle": "{v} référence(s) — statut calculé automatiquement.",
+  "stock.addProduct": "Ajouter un produit",
+  "stock.search": "Rechercher par nom, SKU ou marque…",
+  "stock.allCategories": "Toutes les catégories",
+  "stock.category": "Catégorie",
+  "stock.colProduct": "Produit",
+  "stock.colPurchase": "Achat",
+  "stock.colSale": "Vente",
+  "stock.colMargin": "Marge",
+  "stock.colStock": "Stock",
+  "stock.colStatus": "Statut",
+  "stock.colActions": "Actions",
+  "stock.noProducts": "Aucun produit trouvé.",
+  "stock.editProduct": "Modifier le produit",
+  "stock.newProduct": "Nouveau produit",
+  "stock.dialogDesc": "Les prix et le stock alimentent le tableau de bord automatiquement.",
+  "stock.sku": "Référence (SKU)",
+  "stock.brand": "Marque",
+  "stock.productName": "Nom du produit",
+  "stock.supplier": "Fournisseur",
+  "stock.purchasePrice": "Prix d'achat",
+  "stock.salePrice": "Prix de vente",
+  "stock.marginCalc": "Marge calculée :",
+  "stock.perUnit": "/ unité",
+  "stock.quantity": "Quantité en stock",
+  "stock.threshold": "Seuil d'alerte",
+  "stock.decreaseStock": "Diminuer le stock",
+  "stock.increaseStock": "Augmenter le stock",
+  "stock.skuRequired": "Le nom et la référence (SKU) sont obligatoires.",
+  "stock.productUpdated": "Produit mis à jour.",
+  "stock.productAdded": "Produit ajouté.",
+  "stock.confirmDelete": "Supprimer « {v} » ?",
+  "stock.productDeleted": "Produit supprimé.",
+  "stock.deleteError": "Suppression impossible.",
+  "stock.adjustError": "Ajustement impossible.",
+  // Ventes
+  "sales.title": "Ventes",
+  "sales.subtitle": "Enregistrez vos ventes : le stock et le chiffre d'affaires sont mis à jour automatiquement.",
+  "sales.search": "Rechercher une vente...",
+  "sales.newSale": "Nouvelle vente",
+  "sales.recordSale": "Enregistrer une vente",
+  "sales.product": "Produit",
+  "sales.chooseProduct": "Choisir un produit",
+  "sales.quantity": "Quantité",
+  "sales.unitPrice": "Prix unitaire",
+  "sales.customer": "Client (optionnel)",
+  "sales.customerName": "Nom du client",
+  "sales.payment": "Paiement",
+  "sales.saleTotal": "Total de la vente",
+  "sales.revenue": "Chiffre d'affaires",
+  "sales.profit": "Bénéfice",
+  "sales.colDate": "Date",
+  "sales.colQty": "Qté",
+  "sales.colUnitPrice": "Prix U.",
+  "sales.colTotal": "Total",
+  "sales.colCustomer": "Client",
+  "sales.colPayment": "Paiement",
+  "sales.noSales": "Aucune vente pour le moment.",
+  "sales.selectProduct": "Sélectionnez un produit.",
+  "sales.invalidQty": "Quantité invalide.",
+  "sales.insufficientStock": "Stock insuffisant : {v} en stock.",
+  "sales.recorded": "Vente enregistrée. Stock mis à jour.",
+  "sales.recordError": "Impossible d'enregistrer la vente.",
+  "sales.deleted": "Vente supprimée. Stock restauré.",
+  "sales.deleteError": "Suppression impossible.",
+  "sales.deleteSaleOf": "Supprimer la vente de {v}",
+  // Fournisseurs
+  "sup.title": "Fournisseurs",
+  "sup.subtitle": "Gérez vos fournisseurs et retrouvez le nombre de produits associés à chacun.",
+  "sup.search": "Rechercher un fournisseur...",
+  "sup.newSupplier": "Nouveau fournisseur",
+  "sup.none": "Aucun fournisseur.",
+  "sup.editSupplier": "Modifier le fournisseur",
+  "sup.name": "Nom",
+  "sup.contact": "Contact",
+  "sup.phone": "Téléphone",
+  "sup.email": "Email",
+  "sup.address": "Adresse",
+  "sup.notes": "Notes",
+  "sup.nameRequired": "Le nom du fournisseur est requis.",
+  "sup.updated": "Fournisseur mis à jour.",
+  "sup.added": "Fournisseur ajouté.",
+  "sup.saveError": "Enregistrement impossible.",
+  "sup.deleted": "Fournisseur supprimé.",
+  "sup.deleteError": "Suppression impossible.",
+  "sup.deleteSupplier": "Supprimer {v}",
+  // Statistiques
+  "stats.title": "Statistiques",
+  "stats.subtitle": "Analyse détaillée de vos ventes, marges et de votre stock.",
+  "stats.avgMargin": "Marge moyenne",
+  "stats.totalProfit": "Bénéfice total",
+  "stats.avgBasket": "Panier moyen",
+  "stats.stockValue": "Valeur du stock",
+  "stats.top5": "Top 5 des produits",
+  "stats.colProduct": "Produit",
+  "stats.colUnits": "Unités",
+  "stats.colRevenue": "CA",
+  "stats.noSales": "Aucune vente enregistrée.",
+  "stats.revByCategory": "CA par catégorie",
+  "stats.colCategory": "Catégorie",
+  "stats.colRevenueFull": "Chiffre d'affaires",
+  "stats.noData": "Aucune donnée.",
+  "stats.refSettings": "Paramètres de référence",
+  "stats.productCategories": "Catégories de produits",
+  "stats.paymentMethods": "Moyens de paiement",
+}
+
+const en: Dict = {
+  // Navigation
+  "nav.dashboard": "Dashboard",
+  "nav.stock": "Stock",
+  "nav.sales": "Sales",
+  "nav.suppliers": "Suppliers",
+  "nav.stats": "Statistics",
+  "nav.signOut": "Sign out",
+  // Preferences
+  "prefs.title": "Preferences",
+  "prefs.language": "Language",
+  "prefs.currency": "Currency",
+  "prefs.close": "Close",
+  "prefs.hint": "The currency automatically converts all amounts (base: euro).",
+  // Common
+  "common.inStock": "in stock",
+  "common.cancel": "Cancel",
+  "common.save": "Save",
+  "common.add": "Add",
+  "common.update": "Update",
+  "common.edit": "Edit",
+  "common.saving": "Saving...",
+  "common.none": "None",
+  "common.error": "Something went wrong.",
+  // Stock statuses
+  "status.in_stock": "Available",
+  "status.low_stock": "Low stock",
+  "status.out_of_stock": "Out of stock",
+  // Dashboard
+  "dash.title": "Dashboard",
+  "dash.subtitle": "An overview of your activity, updated in real time.",
+  "dash.revenue": "Revenue",
+  "dash.profit": "Profit",
+  "dash.avgMargin": "Average margin {v}%",
+  "dash.sales": "Sales",
+  "dash.unitsSoldHint": "{v} units sold",
+  "dash.stockValue": "Stock value",
+  "dash.references": "{v} items",
+  "dash.catalogProducts": "Catalog products",
+  "dash.lowStock": "Low stock",
+  "dash.outOfStock": "Out of stock",
+  "dash.unitsSold": "Units sold",
+  "dash.topProducts": "Best-selling products",
+  "dash.noSalesYet": "No sales yet.",
+  "dash.toRestock": "To restock",
+  "dash.manage": "Manage",
+  "dash.wellStocked": "Everything is well stocked.",
+  "dash.unitsShort": "u.",
+  // Charts
+  "chart.revenue14": "Revenue (last 14 days)",
+  "chart.noSales": "No sales recorded yet.",
+  "chart.revByCategory": "Revenue by category",
+  "chart.noData": "No data to display.",
+  "chart.revShort": "Rev.",
+  // Stock
+  "stock.title": "Product stock",
+  "stock.subtitle": "{v} item(s) — status computed automatically.",
+  "stock.addProduct": "Add a product",
+  "stock.search": "Search by name, SKU or brand…",
+  "stock.allCategories": "All categories",
+  "stock.category": "Category",
+  "stock.colProduct": "Product",
+  "stock.colPurchase": "Cost",
+  "stock.colSale": "Price",
+  "stock.colMargin": "Margin",
+  "stock.colStock": "Stock",
+  "stock.colStatus": "Status",
+  "stock.colActions": "Actions",
+  "stock.noProducts": "No products found.",
+  "stock.editProduct": "Edit product",
+  "stock.newProduct": "New product",
+  "stock.dialogDesc": "Prices and stock feed the dashboard automatically.",
+  "stock.sku": "Reference (SKU)",
+  "stock.brand": "Brand",
+  "stock.productName": "Product name",
+  "stock.supplier": "Supplier",
+  "stock.purchasePrice": "Cost price",
+  "stock.salePrice": "Sale price",
+  "stock.marginCalc": "Computed margin:",
+  "stock.perUnit": "/ unit",
+  "stock.quantity": "Quantity in stock",
+  "stock.threshold": "Alert threshold",
+  "stock.decreaseStock": "Decrease stock",
+  "stock.increaseStock": "Increase stock",
+  "stock.skuRequired": "Name and reference (SKU) are required.",
+  "stock.productUpdated": "Product updated.",
+  "stock.productAdded": "Product added.",
+  "stock.confirmDelete": "Delete \u201c{v}\u201d?",
+  "stock.productDeleted": "Product deleted.",
+  "stock.deleteError": "Could not delete.",
+  "stock.adjustError": "Could not adjust.",
+  // Sales
+  "sales.title": "Sales",
+  "sales.subtitle": "Record your sales: stock and revenue update automatically.",
+  "sales.search": "Search a sale...",
+  "sales.newSale": "New sale",
+  "sales.recordSale": "Record a sale",
+  "sales.product": "Product",
+  "sales.chooseProduct": "Choose a product",
+  "sales.quantity": "Quantity",
+  "sales.unitPrice": "Unit price",
+  "sales.customer": "Customer (optional)",
+  "sales.customerName": "Customer name",
+  "sales.payment": "Payment",
+  "sales.saleTotal": "Sale total",
+  "sales.revenue": "Revenue",
+  "sales.profit": "Profit",
+  "sales.colDate": "Date",
+  "sales.colQty": "Qty",
+  "sales.colUnitPrice": "Unit price",
+  "sales.colTotal": "Total",
+  "sales.colCustomer": "Customer",
+  "sales.colPayment": "Payment",
+  "sales.noSales": "No sales yet.",
+  "sales.selectProduct": "Select a product.",
+  "sales.invalidQty": "Invalid quantity.",
+  "sales.insufficientStock": "Not enough stock: {v} in stock.",
+  "sales.recorded": "Sale recorded. Stock updated.",
+  "sales.recordError": "Could not record the sale.",
+  "sales.deleted": "Sale deleted. Stock restored.",
+  "sales.deleteError": "Could not delete.",
+  "sales.deleteSaleOf": "Delete the sale of {v}",
+  // Suppliers
+  "sup.title": "Suppliers",
+  "sup.subtitle": "Manage your suppliers and see how many products are linked to each.",
+  "sup.search": "Search a supplier...",
+  "sup.newSupplier": "New supplier",
+  "sup.none": "No suppliers.",
+  "sup.editSupplier": "Edit supplier",
+  "sup.name": "Name",
+  "sup.contact": "Contact",
+  "sup.phone": "Phone",
+  "sup.email": "Email",
+  "sup.address": "Address",
+  "sup.notes": "Notes",
+  "sup.nameRequired": "The supplier name is required.",
+  "sup.updated": "Supplier updated.",
+  "sup.added": "Supplier added.",
+  "sup.saveError": "Could not save.",
+  "sup.deleted": "Supplier deleted.",
+  "sup.deleteError": "Could not delete.",
+  "sup.deleteSupplier": "Delete {v}",
+  // Statistics
+  "stats.title": "Statistics",
+  "stats.subtitle": "A detailed analysis of your sales, margins and stock.",
+  "stats.avgMargin": "Average margin",
+  "stats.totalProfit": "Total profit",
+  "stats.avgBasket": "Average basket",
+  "stats.stockValue": "Stock value",
+  "stats.top5": "Top 5 products",
+  "stats.colProduct": "Product",
+  "stats.colUnits": "Units",
+  "stats.colRevenue": "Rev.",
+  "stats.noSales": "No sales recorded.",
+  "stats.revByCategory": "Revenue by category",
+  "stats.colCategory": "Category",
+  "stats.colRevenueFull": "Revenue",
+  "stats.noData": "No data.",
+  "stats.refSettings": "Reference settings",
+  "stats.productCategories": "Product categories",
+  "stats.paymentMethods": "Payment methods",
+}
+
+export const translations: Record<Lang, Dict> = { fr, en }
+
+export type Translator = (key: string, vars?: Record<string, string | number>) => string
+
+export function createTranslator(lang: Lang): Translator {
+  const dict = translations[lang] ?? translations.fr
+  return (key, vars) => {
+    let s = dict[key] ?? translations.fr[key] ?? key
+    if (vars) {
+      for (const k of Object.keys(vars)) {
+        s = s.replace(new RegExp(`\\{${k}\\}`, "g"), String(vars[k]))
+      }
+    }
+    return s
+  }
+}
+
+// Traduction des valeurs stockées en base (canoniques en français).
+const CATEGORY_EN: Record<string, string> = {
+  Smartphone: "Smartphone",
+  Tablette: "Tablet",
+  Accessoire: "Accessory",
+  "Batterie externe": "Power bank",
+  "Écouteurs": "Earphones",
+  Chargeur: "Charger",
+  "Coque & Protection": "Case & Protection",
+  "Objet connecté": "Connected device",
+}
+
+const PAYMENT_EN: Record<string, string> = {
+  "Espèces": "Cash",
+  "Carte bancaire": "Card",
+  "Mobile Money": "Mobile Money",
+  Virement: "Bank transfer",
+}
+
+export function tCategory(cat: string, lang: Lang): string {
+  return lang === "en" ? CATEGORY_EN[cat] ?? cat : cat
+}
+
+export function tPayment(pm: string, lang: Lang): string {
+  return lang === "en" ? PAYMENT_EN[pm] ?? pm : pm
+}
+
+export function formatNumberL(value: number, lang: Lang): string {
+  return new Intl.NumberFormat(lang === "en" ? "en-US" : "fr-FR").format(Number.isFinite(value) ? value : 0)
+}
+
+export function formatDateL(value: Date | string, lang: Lang): string {
+  const d = typeof value === "string" ? new Date(value) : value
+  return new Intl.DateTimeFormat(lang === "en" ? "en-US" : "fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d)
+}
