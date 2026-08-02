@@ -10,8 +10,9 @@ import {
   type ProductRow,
   type ProductInput,
 } from "@/app/actions/products"
-import { CATEGORIES, stockStatus } from "@/lib/helpers"
+import { stockStatus } from "@/lib/helpers"
 import { usePreferences } from "@/components/preferences-provider"
+import { CategoryManager } from "@/components/category-manager"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -40,7 +41,7 @@ type Supplier = { id: number; name: string }
 const emptyForm: ProductInput = {
   sku: "",
   name: "",
-  category: CATEGORIES[0],
+  category: "",
   brand: "",
   supplierId: null,
   purchasePrice: 0,
@@ -59,7 +60,15 @@ function StatusBadge({ quantity, threshold }: { quantity: number; threshold: num
   return <Badge className="bg-chart-3/15 text-chart-3 hover:bg-chart-3/15">{label}</Badge>
 }
 
-export function StockManager({ products, suppliers }: { products: ProductRow[]; suppliers: Supplier[] }) {
+export function StockManager({
+  products,
+  suppliers,
+  categories,
+}: {
+  products: ProductRow[]
+  suppliers: Supplier[]
+  categories: string[]
+}) {
   const { t, money, formatRawMoney, tCategory, symbol, decimals, fromBase, toBase } = usePreferences()
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<string>("all")
@@ -67,6 +76,13 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
   const [editing, setEditing] = useState<ProductRow | null>(null)
   const [form, setForm] = useState<ProductInput>(emptyForm)
   const [saving, setSaving] = useState(false)
+
+  // Nombre de produits par catégorie (pour la gestion des catégories).
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const p of products) counts[p.category] = (counts[p.category] ?? 0) + 1
+    return counts
+  }, [products])
 
   // Les prix du formulaire sont saisis dans la devise active ; la base est en euros.
   const roundToCur = (eur: number) => {
@@ -88,7 +104,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
 
   function openCreate() {
     setEditing(null)
-    setForm(emptyForm)
+    setForm({ ...emptyForm, category: categories[0] ?? "" })
     setOpen(true)
   }
 
@@ -111,6 +127,10 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
   async function handleSave() {
     if (!form.name.trim() || !form.sku.trim()) {
       toast.error(t("stock.skuRequired"))
+      return
+    }
+    if (!form.category) {
+      toast.error(t("stock.categoryRequired"))
       return
     }
     setSaving(true)
@@ -163,9 +183,12 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
           <h1 className="font-heading text-2xl font-bold text-foreground">{t("stock.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("stock.subtitle", { v: products.length })}</p>
         </div>
-        <Button onClick={openCreate} className="gap-2">
-          <Plus className="size-4" /> {t("stock.addProduct")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <CategoryManager categories={categories} counts={categoryCounts} />
+          <Button onClick={openCreate} className="gap-2">
+            <Plus className="size-4" /> {t("stock.addProduct")}
+          </Button>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">
@@ -186,7 +209,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("stock.allCategories")}</SelectItem>
-            {CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <SelectItem key={c} value={c}>
                 {tCategory(c)}
               </SelectItem>
@@ -376,12 +399,17 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
                 <Label>{t("stock.category")}</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v ?? CATEGORIES[0] })}>
+                <Select
+                  value={form.category || undefined}
+                  onValueChange={(v) => setForm({ ...form, category: v ?? "" })}
+                >
                   <SelectTrigger>
-                    <SelectValue>{(value: string) => tCategory(value)}</SelectValue>
+                    <SelectValue placeholder={t("stock.category")}>
+                      {(value: string) => tCategory(value)}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((c) => (
+                    {categories.map((c) => (
                       <SelectItem key={c} value={c}>
                         {tCategory(c)}
                       </SelectItem>

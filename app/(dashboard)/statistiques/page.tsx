@@ -11,14 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { CATEGORIES, PAYMENT_METHODS } from "@/lib/helpers"
+import { PAYMENT_METHODS } from "@/lib/helpers"
 import { getPreferences } from "@/lib/preferences"
+import { getCategories } from "@/app/actions/categories"
 import { createTranslator, formatNumberL, tCategory, tPayment } from "@/lib/i18n"
 import { formatConverted } from "@/lib/currency"
 import { Percent, Coins, Boxes, TrendingUp } from "lucide-react"
 
 export default async function StatistiquesPage() {
-  const d = await getDashboard()
+  const [d, categories] = await Promise.all([getDashboard(), getCategories()])
   const { lang, currency } = await getPreferences()
   const t = createTranslator(lang)
   const money = (eur: number) => formatConverted(eur, currency, lang)
@@ -123,7 +124,7 @@ export default async function StatistiquesPage() {
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium text-foreground">{t("stats.productCategories")}</p>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <Badge key={c} variant="secondary">
                   {tCategory(c, lang)}
                 </Badge>
