@@ -24,6 +24,7 @@ export const auth = betterAuth({
     "https://*.vusercontent.net",
     "https://*.v0.dev",
     "https://*.vercel.app",
+    "https://*.vercel.run",
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 jours

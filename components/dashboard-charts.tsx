@@ -22,7 +22,7 @@ export function RevenueChart({ data }: { data: { day: string; revenue: number }[
         ) : (
           <ChartContainer
             config={{ revenue: { label: "CA", color: "var(--chart-1)" } }}
-            className="h-64 w-full"
+            className="aspect-auto h-64 w-full"
           >
             <AreaChart data={chartData} margin={{ left: 4, right: 8, top: 8 }}>
               <defs>
@@ -64,7 +64,7 @@ export function CategoryChart({ data }: { data: { category: string; revenue: num
         ) : (
           <ChartContainer
             config={{ revenue: { label: "CA", color: "var(--chart-2)" } }}
-            className="h-64 w-full"
+            className="aspect-auto h-64 w-full"
           >
             <BarChart data={data} layout="vertical" margin={{ left: 8, right: 8 }}>
               <CartesianGrid horizontal={false} strokeDasharray="3 3" />
