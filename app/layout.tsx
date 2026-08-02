@@ -1,15 +1,16 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Inter } from 'next/font/google'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const manrope = Manrope({ subsets: ['latin'], variable: '--font-heading' })
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
 
 export const metadata: Metadata = {
-  title: 'TéléStock — Gestion de Boutique Télécom (Excel)',
+  title: 'TéléStock — Gestion de Boutique Télécom',
   description:
-    "Générez un classeur Excel professionnel et entièrement automatisé pour gérer le stock, les ventes, les fournisseurs et les statistiques de votre boutique de téléphonie.",
+    "Application de gestion pour boutique de téléphonie : stock, ventes, fournisseurs, tableau de bord et statistiques, reliés et mis à jour automatiquement.",
   generator: 'v0.app',
   manifest: '/manifest.json',
 }
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="fr" className={`light ${manrope.variable} ${inter.variable} bg-background`}>
       <body className="font-sans antialiased">
         {children}
+        <Toaster position="top-center" />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
