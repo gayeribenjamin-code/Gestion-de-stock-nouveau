@@ -4,7 +4,8 @@ import { StatCard } from "@/components/stat-card"
 import { RevenueChart, CategoryChart } from "@/components/dashboard-charts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { formatCurrency, formatNumber } from "@/lib/helpers"
 import { Euro, TrendingUp, Package, ShoppingCart, AlertTriangle, Boxes, ArrowRight } from "lucide-react"
 
@@ -93,11 +94,9 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="font-heading text-base">À réapprovisionner</CardTitle>
-            <Button asChild variant="ghost" size="sm" className="gap-1 text-xs">
-              <Link href="/stock">
-                Gérer <ArrowRight className="size-3.5" />
-              </Link>
-            </Button>
+            <Link href="/stock" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1 text-xs")}>
+              Gérer <ArrowRight className="size-3.5" />
+            </Link>
           </CardHeader>
           <CardContent>
             {d.lowStockProducts.length === 0 ? (

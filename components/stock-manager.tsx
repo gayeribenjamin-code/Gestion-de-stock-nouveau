@@ -164,7 +164,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
             className="pl-9 text-base"
           />
         </div>
-        <Select value={category} onValueChange={setCategory}>
+        <Select value={category} onValueChange={(v) => setCategory(v ?? "all")}>
           <SelectTrigger className="sm:w-56">
             <SelectValue placeholder="Catégorie" />
           </SelectTrigger>
@@ -358,7 +358,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
                 <Label>Catégorie</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v ?? CATEGORIES[0] })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -375,7 +375,7 @@ export function StockManager({ products, suppliers }: { products: ProductRow[]; 
                 <Label>Fournisseur</Label>
                 <Select
                   value={form.supplierId ? String(form.supplierId) : "none"}
-                  onValueChange={(v) => setForm({ ...form, supplierId: v === "none" ? null : Number(v) })}
+                  onValueChange={(v) => setForm({ ...form, supplierId: !v || v === "none" ? null : Number(v) })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Aucun" />
