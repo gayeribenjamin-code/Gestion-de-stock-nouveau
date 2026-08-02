@@ -19,6 +19,7 @@ export const auth = betterAuth({
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
     ...(process.env.VERCEL_PROJECT_PRODUCTION_URL ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`] : []),
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
     // Prévisualisations v0 / Vercel (le navigateur rend l'app dans une iframe cross-site)
     "https://*.vusercontent.net",
     "https://*.v0.dev",
