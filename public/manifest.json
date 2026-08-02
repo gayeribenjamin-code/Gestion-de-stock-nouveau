@@ -1,7 +1,7 @@
 {
   "name": "TéléStock — Gestion Boutique Télécom",
   "short_name": "TéléStock",
-  "description": "Classeur Excel professionnel et automatisé pour la gestion d'une boutique de télécommunications.",
+  "description": "Application de gestion pour boutique de téléphonie : stock, ventes, fournisseurs, tableau de bord et statistiques.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
