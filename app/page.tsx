@@ -23,7 +23,7 @@ const sheets = [
   {
     icon: Boxes,
     name: "Stock des produits",
-    desc: "32 colonnes : coût réel, marge, stock disponible et statut 🟢🟡🔴 automatiques.",
+    desc: "32 colonnes : coût réel, marge, stock disponible et statut (Disponible / Stock faible / Rupture) automatiques.",
   },
   {
     icon: ShoppingCart,
@@ -96,8 +96,8 @@ export default function Page() {
             Gérez votre boutique télécom dans un fichier Excel intelligent
           </h1>
           <p className="mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-primary-foreground/80">
-            Un classeur <span className="font-semibold text-accent">.xlsx</span> moderne et entièrement automatisé :
-            stock, ventes, fournisseurs, tableau de bord et statistiques, reliés entre eux. Prêt à l&apos;emploi, avec
+            Un classeur <span className="font-semibold text-accent">{".xlsx "}</span>moderne et entièrement automatisé
+            : stock, ventes, fournisseurs, tableau de bord et statistiques, reliés entre eux. Prêt à l&apos;emploi, avec
             des exemples réalistes.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
