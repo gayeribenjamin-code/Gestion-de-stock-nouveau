@@ -97,6 +97,33 @@ export const sales = pgTable("sales", {
   unitPurchasePrice: numeric("unitPurchasePrice", { precision: 12, scale: 2 }).notNull().default("0"),
   customerName: text("customerName"),
   paymentMethod: text("paymentMethod"), // Espèces, Carte, Mobile Money, ...
+  invoiceId: integer("invoiceId"), // rattachement à une facture (null = vente simple)
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+})
+
+// Clients (carnet réutilisable)
+export const customers = pgTable("customers", {
+  id: serial("id").primaryKey(),
+  userId: text("userId").notNull(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  email: text("email"),
+  address: text("address"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+})
+
+// Factures
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  userId: text("userId").notNull(),
+  invoiceNumber: text("invoiceNumber").notNull(), // ex. F-2026-0001
+  customerId: integer("customerId"), // null si client libre / supprimé
+  customerName: text("customerName"), // snapshot conservé même si le client est supprimé
+  status: text("status").notNull().default("paid"), // paid | unpaid
+  paymentMethod: text("paymentMethod"),
+  notes: text("notes"),
+  total: numeric("total", { precision: 12, scale: 2 }).notNull().default("0"), // montant en euros (base)
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 })
 
