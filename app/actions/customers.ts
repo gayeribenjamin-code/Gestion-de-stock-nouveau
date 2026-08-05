@@ -14,8 +14,12 @@ export type CustomerRow = {
   address: string | null
   notes: string | null
   invoiceCount: number
+  totalSpent: number
   createdAt: Date
 }
+
+// Alias utilisé côté UI
+export type CustomerWithStats = CustomerRow
 
 export async function getCustomers(): Promise<CustomerRow[]> {
   const userId = await getUserId()
@@ -29,6 +33,7 @@ export async function getCustomers(): Promise<CustomerRow[]> {
       notes: customers.notes,
       createdAt: customers.createdAt,
       invoiceCount: sql<number>`count(${invoices.id})`,
+      totalSpent: sql<number>`coalesce(sum(${invoices.total}), 0)`,
     })
     .from(customers)
     .leftJoin(invoices, and(eq(invoices.customerId, customers.id), eq(invoices.userId, userId)))
@@ -36,7 +41,11 @@ export async function getCustomers(): Promise<CustomerRow[]> {
     .groupBy(customers.id)
     .orderBy(desc(customers.createdAt))
 
-  return rows.map((r) => ({ ...r, invoiceCount: Number(r.invoiceCount) }))
+  return rows.map((r) => ({
+    ...r,
+    invoiceCount: Number(r.invoiceCount),
+    totalSpent: Number(r.totalSpent),
+  }))
 }
 
 export type CustomerInput = {
