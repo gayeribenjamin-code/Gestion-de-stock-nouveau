@@ -7,12 +7,13 @@ import { cn } from "@/lib/utils"
 import { usePreferences } from "@/components/preferences-provider"
 import { PreferencesMenu } from "@/components/preferences-menu"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Package, ShoppingCart, Truck, BarChart3, Smartphone, LogOut } from "lucide-react"
+import { LayoutDashboard, Package, ShoppingCart, Truck, BarChart3, FileText, Smartphone, LogOut } from "lucide-react"
 
 const links = [
   { href: "/", key: "nav.dashboard", shortKey: "nav.short.dashboard", icon: LayoutDashboard },
   { href: "/stock", key: "nav.stock", shortKey: "nav.short.stock", icon: Package },
   { href: "/ventes", key: "nav.sales", shortKey: "nav.short.sales", icon: ShoppingCart },
+  { href: "/factures", key: "nav.invoices", shortKey: "nav.short.invoices", icon: FileText },
   { href: "/fournisseurs", key: "nav.suppliers", shortKey: "nav.short.suppliers", icon: Truck },
   { href: "/statistiques", key: "nav.stats", shortKey: "nav.short.stats", icon: BarChart3 },
 ]

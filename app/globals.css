@@ -163,3 +163,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Impression : masquer la navigation et n'imprimer que le contenu (facture) */
+@media print {
+  aside,
+  header,
+  nav {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+}
