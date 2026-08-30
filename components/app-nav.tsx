@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth-client"
+import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { usePreferences } from "@/components/preferences-provider"
 import { PreferencesMenu } from "@/components/preferences-menu"
@@ -24,7 +24,7 @@ export function DesktopNav({ shopName }: { shopName: string }) {
   const { t } = usePreferences()
 
   async function signOut() {
-    await authClient.signOut()
+    await createClient().auth.signOut()
     router.push("/sign-in")
     router.refresh()
   }
@@ -102,7 +102,7 @@ export function MobileHeader({ shopName }: { shopName: string }) {
   const router = useRouter()
   const { t } = usePreferences()
   async function signOut() {
-    await authClient.signOut()
+    await createClient().auth.signOut()
     router.push("/sign-in")
     router.refresh()
   }

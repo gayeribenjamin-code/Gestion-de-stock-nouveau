@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { authClient } from "@/lib/auth-client"
+import { createClient } from "@/lib/supabase/client"
 import { seedDemoData } from "@/app/actions/seed"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,18 +28,39 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     setLoading(true)
 
     try {
+      const supabase = createClient()
       if (isSignUp) {
-        const { error } = await authClient.signUp.email({ email, password, name })
-        if (error) throw new Error(error.message || "Inscription impossible")
-        // Pré-remplit des exemples réalistes pour le nouveau compte
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: { name: name.trim() },
+            emailRedirectTo:
+              process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ??
+              `${window.location.origin}/auth/callback`,
+          },
+        })
+        if (error) {
+          if (error.message.toLowerCase().includes("password")) throw new Error("Le mot de passe doit contenir au moins 8 caractères.")
+          throw new Error("Impossible de créer le compte. Vérifiez vos informations et réessayez.")
+        }
+        if (!data.session) {
+          setError("Compte créé. Vérifiez votre boîte mail pour confirmer votre adresse avant de vous connecter.")
+          setLoading(false)
+          return
+        }
         try {
           await seedDemoData()
         } catch {
-          // Non bloquant : l'utilisateur pourra saisir ses données manuellement
+          // Les données de démonstration sont facultatives.
         }
       } else {
-        const { error } = await authClient.signIn.email({ email, password })
-        if (error) throw new Error(error.message || "Identifiants incorrects")
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+        if (error) {
+          const message = error.message.toLowerCase()
+          if (message.includes("email not confirmed")) throw new Error("Confirmez votre adresse email avant de vous connecter.")
+          throw new Error("Identifiants incorrects")
+        }
       }
       router.push("/")
       router.refresh()
