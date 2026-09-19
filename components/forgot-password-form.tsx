@@ -18,8 +18,11 @@ export function ForgotPasswordForm() {
     setLoading(true)
     setMessage(null)
     setError(null)
+    const redirectTo =
+      process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ??
+      `${window.location.origin}/auth/callback`
     const { error: resetError } = await createClient().auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      redirectTo: `${redirectTo}?next=/reset-password`,
     })
     if (resetError) setError("Impossible d’envoyer le lien. Vérifiez l’adresse et réessayez.")
     else setMessage("Si cette adresse correspond à un compte, un lien de réinitialisation vient d’être envoyé.")
