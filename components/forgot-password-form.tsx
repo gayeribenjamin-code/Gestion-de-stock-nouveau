@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react"
 import Link from "next/link"
-import { createClient } from "@/lib/supabase/client"
+import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,20 +18,15 @@ export function ForgotPasswordForm() {
     setLoading(true)
     setMessage(null)
     setError(null)
-    const redirectTo =
-      process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ??
-      `${window.location.origin}/auth/callback`
-    const { error: resetError } = await createClient().auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${redirectTo}?next=/reset-password`,
+    const { error: resetError } = await authClient.requestPasswordReset({
+      email: email.trim(),
+      redirectTo: `${window.location.origin}/reset-password`,
     })
     if (resetError) {
-      setError(
-        resetError.message === "Failed to fetch"
-          ? "Le service de récupération est momentanément inaccessible. Réessayez dans quelques instants."
-          : "Impossible d’envoyer le lien. Vérifiez l’adresse et réessayez.",
-      )
+      setError("La récupération est indisponible pour le moment. Réessayez plus tard.")
+    } else {
+      setMessage("Si cette adresse correspond à un compte, un lien de réinitialisation vient d’être envoyé.")
     }
-    else setMessage("Si cette adresse correspond à un compte, un lien de réinitialisation vient d’être envoyé.")
     setLoading(false)
   }
 

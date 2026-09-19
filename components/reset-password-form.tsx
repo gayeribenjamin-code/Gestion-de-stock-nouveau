@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,7 +20,13 @@ export function ResetPasswordForm() {
     if (password.length < 8) return setError("Le mot de passe doit contenir au moins 8 caractères.")
     if (password !== confirmation) return setError("Les mots de passe ne correspondent pas.")
     setLoading(true)
-    const { error: updateError } = await createClient().auth.updateUser({ password })
+    const token = new URLSearchParams(window.location.search).get("token")
+    if (!token) {
+      setError("Le lien de réinitialisation est invalide ou expiré.")
+      setLoading(false)
+      return
+    }
+    const { error: updateError } = await authClient.resetPassword({ newPassword: password, token })
     if (updateError) setError("Le lien a expiré. Demandez une nouvelle réinitialisation.")
     else router.push("/")
     setLoading(false)

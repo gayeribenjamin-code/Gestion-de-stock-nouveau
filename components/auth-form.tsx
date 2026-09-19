@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { createClient } from "@/lib/supabase/client"
+import { authClient } from "@/lib/auth-client"
 import { seedDemoData } from "@/app/actions/seed"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,26 +29,15 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     setLoading(true)
 
     try {
-      const supabase = createClient()
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await authClient.signUp.email({
           email: email.trim(),
           password,
-          options: {
-            data: { name: name.trim() },
-            emailRedirectTo:
-              process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ??
-              `${window.location.origin}/auth/callback`,
-          },
+          name: name.trim(),
         })
         if (error) {
-          if (error.message.toLowerCase().includes("password")) throw new Error("Le mot de passe doit contenir au moins 8 caractères.")
+          if (error.message?.toLowerCase().includes("password")) throw new Error("Le mot de passe doit contenir au moins 8 caractères.")
           throw new Error("Impossible de créer le compte. Vérifiez vos informations et réessayez.")
-        }
-        if (!data.session) {
-          setError("Compte créé. Vérifiez votre boîte mail pour confirmer votre adresse avant de vous connecter.")
-          setLoading(false)
-          return
         }
         try {
           await seedDemoData()
@@ -56,12 +45,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           // Les données de démonstration sont facultatives.
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-        if (error) {
-          const message = error.message.toLowerCase()
-          if (message.includes("email not confirmed")) throw new Error("Confirmez votre adresse email avant de vous connecter.")
-          throw new Error("Identifiants incorrects")
-        }
+        const { error } = await authClient.signIn.email({ email: email.trim(), password })
+        if (error) throw new Error("Identifiants incorrects")
       }
       router.push("/")
       router.refresh()

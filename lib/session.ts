@@ -1,14 +1,13 @@
-import { createClient } from "@/lib/supabase/server"
-
-export async function getUserId(): Promise<string> {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) throw new Error("Non autorisé")
-  return user.id
-}
+import { headers } from "next/headers"
+import { auth } from "@/lib/auth"
 
 export async function getSessionUser() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  return user
+  const session = await auth.api.getSession({ headers: await headers() })
+  return session?.user ?? null
+}
+
+export async function getUserId(): Promise<string> {
+  const user = await getSessionUser()
+  if (!user) throw new Error("Non autorisé")
+  return user.id
 }
