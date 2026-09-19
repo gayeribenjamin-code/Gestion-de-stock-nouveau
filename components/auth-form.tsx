@@ -21,6 +21,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [loading, setLoading] = useState(false)
 
   const isSignUp = mode === "sign-up"
+  const isSignIn = mode === "sign-in"
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -113,7 +114,14 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">Mot de passe</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="password">Mot de passe</Label>
+            {isSignIn && (
+              <Link href="/forgot-password" className="min-h-11 py-3 text-sm font-medium text-foreground underline underline-offset-4">
+                Mot de passe oublié ?
+              </Link>
+            )}
+          </div>
           <Input
             id="password"
             type="password"
