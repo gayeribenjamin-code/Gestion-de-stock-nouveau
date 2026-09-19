@@ -24,7 +24,13 @@ export function ForgotPasswordForm() {
     const { error: resetError } = await createClient().auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${redirectTo}?next=/reset-password`,
     })
-    if (resetError) setError("Impossible d’envoyer le lien. Vérifiez l’adresse et réessayez.")
+    if (resetError) {
+      setError(
+        resetError.message === "Failed to fetch"
+          ? "Le service de récupération est momentanément inaccessible. Réessayez dans quelques instants."
+          : "Impossible d’envoyer le lien. Vérifiez l’adresse et réessayez.",
+      )
+    }
     else setMessage("Si cette adresse correspond à un compte, un lien de réinitialisation vient d’être envoyé.")
     setLoading(false)
   }
