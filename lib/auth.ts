@@ -15,16 +15,16 @@ export const auth = betterAuth({
     autoSignIn: true,
   },
   trustedOrigins: [
-    ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
-    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
-    ...(process.env.VERCEL_PROJECT_PRODUCTION_URL ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`] : []),
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    // Prévisualisations v0 / Vercel (le navigateur rend l'app dans une iframe cross-site)
-    "https://*.vusercontent.net",
-    "https://*.v0.dev",
-    "https://*.vercel.app",
-    "https://*.vercel.run",
+    ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
+    ...(process.env.V0_DEV_APP_URL ? [process.env.V0_DEV_APP_URL] : []),
+    ...(process.env.V0_BUILD_URL ? [process.env.V0_BUILD_URL] : []),
+    ...(process.env.V0_SANDBOX_URL ? [process.env.V0_SANDBOX_URL] : []),
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+    ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
+      : []),
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 jours

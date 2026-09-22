@@ -21,6 +21,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [loading, setLoading] = useState(false)
 
   const isSignUp = mode === "sign-up"
+  const isSignIn = mode === "sign-in"
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,17 +30,23 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
 
     try {
       if (isSignUp) {
-        const { error } = await authClient.signUp.email({ email, password, name })
-        if (error) throw new Error(error.message || "Inscription impossible")
-        // Pré-remplit des exemples réalistes pour le nouveau compte
+        const { error } = await authClient.signUp.email({
+          email: email.trim(),
+          password,
+          name: name.trim(),
+        })
+        if (error) {
+          if (error.message?.toLowerCase().includes("password")) throw new Error("Le mot de passe doit contenir au moins 8 caractères.")
+          throw new Error("Impossible de créer le compte. Vérifiez vos informations et réessayez.")
+        }
         try {
           await seedDemoData()
         } catch {
-          // Non bloquant : l'utilisateur pourra saisir ses données manuellement
+          // Les données de démonstration sont facultatives.
         }
       } else {
-        const { error } = await authClient.signIn.email({ email, password })
-        if (error) throw new Error(error.message || "Identifiants incorrects")
+        const { error } = await authClient.signIn.email({ email: email.trim(), password })
+        if (error) throw new Error("Identifiants incorrects")
       }
       router.push("/")
       router.refresh()
@@ -92,7 +99,14 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">Mot de passe</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="password">Mot de passe</Label>
+            {isSignIn && (
+              <Link href="/forgot-password" className="min-h-11 py-3 text-sm font-medium text-foreground underline underline-offset-4">
+                Mot de passe oublié ?
+              </Link>
+            )}
+          </div>
           <Input
             id="password"
             type="password"
