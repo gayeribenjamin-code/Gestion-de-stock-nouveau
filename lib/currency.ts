@@ -52,14 +52,23 @@ export function isCurrencyCode(v: string | undefined | null): v is CurrencyCode 
   return !!v && Object.prototype.hasOwnProperty.call(CURRENCIES, v)
 }
 
+function finiteAmount(value: number): number {
+  return Number.isFinite(value) ? value : 0
+}
+
+function roundBaseEUR(value: number): number {
+  // Keep enough precision in the EUR base to round-trip whole CFA francs exactly.
+  return Math.round(finiteAmount(value) * 1_000_000) / 1_000_000
+}
+
 export function convertFromEUR(amountEUR: number, code: CurrencyCode): number {
-  const n = Number.isFinite(amountEUR) ? amountEUR : 0
-  return n * CURRENCIES[code].rateFromEUR
+  const converted = finiteAmount(amountEUR) * CURRENCIES[code].rateFromEUR
+  return CURRENCIES[code].decimals === 0 ? Math.round(converted) : Math.round(converted * 100) / 100
 }
 
 export function convertToEUR(amount: number, code: CurrencyCode): number {
-  const n = Number.isFinite(amount) ? amount : 0
-  return n / CURRENCIES[code].rateFromEUR
+  const converted = finiteAmount(amount) / CURRENCIES[code].rateFromEUR
+  return roundBaseEUR(converted)
 }
 
 function localeFor(lang: string): string {

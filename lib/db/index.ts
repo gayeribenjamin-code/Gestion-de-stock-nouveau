@@ -12,9 +12,6 @@ export const pool = new Pool({
     process.env.NEON_DATABASE_URL ??
     process.env.NEON_POSTGRES_URL ??
     process.env.DATABASE_URL,
-  // Les endpoints Supabase/Neon peuvent résoudre en IPv6 dans le preview v0,
-  // alors que le runtime ne dispose pas toujours d’une route IPv6.
-  family: 4,
 })
 
 export const db = drizzle(pool, { schema })
