@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-const CURRENCY_ORDER: CurrencyCode[] = ["XOF", "XAF", "EUR", "USD"]
+const CURRENCY_ORDER: CurrencyCode[] = ["XOF", "XAF"]
 
 export function PreferencesMenu({
   variant = "sidebar",
