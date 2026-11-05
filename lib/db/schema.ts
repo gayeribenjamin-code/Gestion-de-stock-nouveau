@@ -78,8 +78,8 @@ export const products = pgTable("products", {
   category: text("category").notNull(), // Smartphone, Accessoire, Audio, Charge, ...
   brand: text("brand"),
   supplierId: integer("supplierId"),
-  purchasePrice: numeric("purchasePrice", { precision: 12, scale: 2 }).notNull().default("0"),
-  salePrice: numeric("salePrice", { precision: 12, scale: 2 }).notNull().default("0"),
+  purchasePrice: numeric("purchasePrice", { precision: 12, scale: 6 }).notNull().default("0"),
+  salePrice: numeric("salePrice", { precision: 12, scale: 6 }).notNull().default("0"),
   quantity: integer("quantity").notNull().default(0),
   reorderThreshold: integer("reorderThreshold").notNull().default(5),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
@@ -93,8 +93,8 @@ export const sales = pgTable("sales", {
   productId: integer("productId").notNull(),
   productName: text("productName").notNull(), // snapshot au moment de la vente
   quantity: integer("quantity").notNull().default(1),
-  unitSalePrice: numeric("unitSalePrice", { precision: 12, scale: 2 }).notNull().default("0"),
-  unitPurchasePrice: numeric("unitPurchasePrice", { precision: 12, scale: 2 }).notNull().default("0"),
+  unitSalePrice: numeric("unitSalePrice", { precision: 12, scale: 6 }).notNull().default("0"),
+  unitPurchasePrice: numeric("unitPurchasePrice", { precision: 12, scale: 6 }).notNull().default("0"),
   customerName: text("customerName"),
   paymentMethod: text("paymentMethod"), // Espèces, Carte, Mobile Money, ...
   invoiceId: integer("invoiceId"), // rattachement à une facture (null = vente simple)
@@ -123,7 +123,7 @@ export const invoices = pgTable("invoices", {
   status: text("status").notNull().default("paid"), // paid | unpaid
   paymentMethod: text("paymentMethod"),
   notes: text("notes"),
-  total: numeric("total", { precision: 12, scale: 2 }).notNull().default("0"), // montant en euros (base)
+  total: numeric("total", { precision: 12, scale: 6 }).notNull().default("0"), // montant en euros (base)
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 })
 
