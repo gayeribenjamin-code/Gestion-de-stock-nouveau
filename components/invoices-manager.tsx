@@ -65,7 +65,7 @@ export function InvoicesManager({
   products: ProductRow[]
   customers: CustomerWithStats[]
 }) {
-  const { t, money, formatDate, tPayment } = usePreferences()
+  const { t, money, formatDate, tPayment, toBase } = usePreferences()
   const router = useRouter()
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
@@ -77,6 +77,7 @@ export function InvoicesManager({
   const [payment, setPayment] = useState<string>(PAYMENT_METHODS[0])
   const [status, setStatus] = useState<InvoiceStatus>("paid")
   const [notes, setNotes] = useState("")
+  const [paidAmount, setPaidAmount] = useState("")
   const [lines, setLines] = useState<Line[]>([newLine()])
 
   const filtered = useMemo(() => {
@@ -103,6 +104,7 @@ export function InvoicesManager({
     setPayment(PAYMENT_METHODS[0])
     setStatus("paid")
     setNotes("")
+    setPaidAmount("")
     setLines([newLine()])
   }
 
@@ -132,6 +134,7 @@ export function InvoicesManager({
         status,
         paymentMethod: payment,
         notes: notes.trim() || null,
+        paidAmount: toBase(Math.max(0, Number.parseInt(paidAmount, 10) || 0)),
         lines: cleanLines,
       })
       toast.success(t("inv.created"))
@@ -392,6 +395,18 @@ export function InvoicesManager({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
+                <Label htmlFor="invPaidAmount">{t("inv.paidAmount")}</Label>
+                <Input
+                  id="invPaidAmount"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={paidAmount}
+                  onChange={(e) => setPaidAmount(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <Label>{t("inv.payment")}</Label>
                 <Select value={payment} onValueChange={(v) => setPayment(v ?? PAYMENT_METHODS[0])}>
                   <SelectTrigger>
@@ -427,7 +442,12 @@ export function InvoicesManager({
 
             <div className="flex items-center justify-between rounded-lg bg-muted p-3">
               <span className="text-sm text-muted-foreground">{t("inv.grandTotal")}</span>
-              <span className="text-lg font-semibold">{money(grandTotal)}</span>
+              <div className="text-right">
+                <span className="block text-lg font-semibold">{money(grandTotal)}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {t("inv.remainingAmount")}: {money(Math.max(0, grandTotal - toBase(Number.parseInt(paidAmount, 10) || 0)))}
+                </span>
+              </div>
             </div>
           </div>
 
