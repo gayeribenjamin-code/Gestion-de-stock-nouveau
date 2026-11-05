@@ -16,6 +16,8 @@ export type InvoiceListRow = {
   status: InvoiceStatus
   paymentMethod: string | null
   total: number
+  paidAmount: number
+  remainingAmount: number
   itemCount: number
   createdAt: Date
 }
@@ -37,6 +39,8 @@ export type InvoiceDetail = {
   paymentMethod: string | null
   notes: string | null
   total: number
+  paidAmount: number
+  remainingAmount: number
   createdAt: Date
   lines: InvoiceLine[]
 }
@@ -52,6 +56,7 @@ export async function getInvoices(customerId?: number): Promise<InvoiceListRow[]
       status: invoices.status,
       paymentMethod: invoices.paymentMethod,
       total: invoices.total,
+      paidAmount: invoices.paidAmount,
       createdAt: invoices.createdAt,
       itemCount: sql<number>`coalesce(sum(${sales.quantity}), 0)`,
     })
@@ -69,6 +74,8 @@ export async function getInvoices(customerId?: number): Promise<InvoiceListRow[]
     ...r,
     status: (r.status as InvoiceStatus) ?? "paid",
     total: Number(r.total),
+    paidAmount: Number(r.paidAmount),
+    remainingAmount: Math.max(0, Number(r.total) - Number(r.paidAmount)),
     itemCount: Number(r.itemCount),
   }))
 }
@@ -95,6 +102,8 @@ export async function getInvoice(id: number): Promise<InvoiceDetail | null> {
     paymentMethod: inv.paymentMethod,
     notes: inv.notes,
     total: Number(inv.total),
+    paidAmount: Number(inv.paidAmount),
+    remainingAmount: Math.max(0, Number(inv.total) - Number(inv.paidAmount)),
     createdAt: inv.createdAt,
     lines: lineRows.map((l) => ({
       id: l.id,
@@ -112,6 +121,7 @@ export type InvoiceInput = {
   status: InvoiceStatus
   paymentMethod?: string | null
   notes?: string | null
+  paidAmount?: number
   lines: { productId: number; quantity: number }[]
 }
 
@@ -175,6 +185,7 @@ export async function createInvoice(input: InvoiceInput): Promise<number> {
         status: input.status,
         paymentMethod: input.paymentMethod || null,
         notes: input.notes?.trim() || null,
+        paidAmount: String(Math.min(Math.max(input.paidAmount ?? 0, 0), Math.round(total * 1_000_000) / 1_000_000)),
         // Keep the EUR base precise; rounding to 2 decimals here loses CFA francs
         // when the amount is converted back to the user's whole-franc currency.
         total: String(Math.round(total * 1_000_000) / 1_000_000),
