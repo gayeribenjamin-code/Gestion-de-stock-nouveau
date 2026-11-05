@@ -33,7 +33,7 @@ const fr: Dict = {
   "prefs.language": "Langue",
   "prefs.currency": "Devise",
   "prefs.close": "Fermer",
-  "prefs.hint": "La devise convertit automatiquement tous les montants (base : euro).",
+  "prefs.hint": "Choisissez le franc CFA utilisé par votre zone.",
   // Commun
   "common.inStock": "en stock",
   "common.cancel": "Annuler",
@@ -305,7 +305,7 @@ const en: Dict = {
   "prefs.language": "Language",
   "prefs.currency": "Currency",
   "prefs.close": "Close",
-  "prefs.hint": "The currency automatically converts all amounts (base: euro).",
+  "prefs.hint": "Choose the CFA franc used in your region.",
   // Common
   "common.inStock": "in stock",
   "common.cancel": "Cancel",
