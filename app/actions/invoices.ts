@@ -175,7 +175,9 @@ export async function createInvoice(input: InvoiceInput): Promise<number> {
         status: input.status,
         paymentMethod: input.paymentMethod || null,
         notes: input.notes?.trim() || null,
-        total: String(total.toFixed(2)),
+        // Keep the EUR base precise; rounding to 2 decimals here loses CFA francs
+        // when the amount is converted back to the user's whole-franc currency.
+        total: String(Math.round(total * 1_000_000) / 1_000_000),
       })
       .returning({ id: invoices.id })
 
