@@ -114,6 +114,22 @@ export function InvoicePrint({
           </div>
         </div>
 
+        {/* Paiement */}
+        <div className="mt-4 grid gap-2 rounded-lg bg-muted px-4 py-3 text-sm sm:grid-cols-3">
+          <div>
+            <span className="block text-muted-foreground">{t("inv.print.total")}</span>
+            <span className="font-semibold text-foreground">{money(invoice.total)}</span>
+          </div>
+          <div>
+            <span className="block text-muted-foreground">{t("inv.print.paidAmount")}</span>
+            <span className="font-semibold text-foreground">{money(invoice.paidAmount)}</span>
+          </div>
+          <div>
+            <span className="block text-muted-foreground">{t("inv.print.remainingAmount")}</span>
+            <span className="font-semibold text-foreground">{money(invoice.remainingAmount)}</span>
+          </div>
+        </div>
+
         {/* Pied */}
         <div className="mt-6 flex flex-col gap-1 border-t border-border pt-6 text-sm text-muted-foreground">
           {invoice.paymentMethod && (

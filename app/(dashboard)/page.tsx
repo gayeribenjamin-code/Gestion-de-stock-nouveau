@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 import { getPreferences } from "@/lib/preferences"
 import { createTranslator, formatNumberL } from "@/lib/i18n"
 import { formatConverted } from "@/lib/currency"
-import { Euro, TrendingUp, Package, ShoppingCart, AlertTriangle, Boxes, ArrowRight } from "lucide-react"
+import { Coins, TrendingUp, Package, ShoppingCart, AlertTriangle, Boxes, ArrowRight } from "lucide-react"
 
 export default async function DashboardPage() {
   const d = await getDashboard()
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label={t("dash.revenue")} value={money(d.totalRevenue)} icon={Euro} tone="positive" />
+        <StatCard label={t("dash.revenue")} value={money(d.totalRevenue)} icon={Coins} tone="positive" />
         <StatCard
           label={t("dash.profit")}
           value={money(d.totalProfit)}

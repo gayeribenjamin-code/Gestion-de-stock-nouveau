@@ -123,6 +123,7 @@ export const invoices = pgTable("invoices", {
   status: text("status").notNull().default("paid"), // paid | unpaid
   paymentMethod: text("paymentMethod"),
   notes: text("notes"),
+  paidAmount: numeric("paidAmount", { precision: 12, scale: 6 }).notNull().default("0"), // montant versé en base
   total: numeric("total", { precision: 12, scale: 6 }).notNull().default("0"), // montant en euros (base)
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 })

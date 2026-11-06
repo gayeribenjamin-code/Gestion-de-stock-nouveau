@@ -65,7 +65,7 @@ export function InvoicesManager({
   products: ProductRow[]
   customers: CustomerWithStats[]
 }) {
-  const { t, money, formatDate, tPayment } = usePreferences()
+  const { t, money, formatDate, tPayment, toBase } = usePreferences()
   const router = useRouter()
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
@@ -77,6 +77,9 @@ export function InvoicesManager({
   const [payment, setPayment] = useState<string>(PAYMENT_METHODS[0])
   const [status, setStatus] = useState<InvoiceStatus>("paid")
   const [notes, setNotes] = useState("")
+  const [paidAmount, setPaidAmount] = useState("")
+  const [activeProductLine, setActiveProductLine] = useState<string | null>(null)
+  const [productSearch, setProductSearch] = useState("")
   const [lines, setLines] = useState<Line[]>([newLine()])
 
   const filtered = useMemo(() => {
@@ -103,6 +106,9 @@ export function InvoicesManager({
     setPayment(PAYMENT_METHODS[0])
     setStatus("paid")
     setNotes("")
+    setPaidAmount("")
+    setActiveProductLine(null)
+    setProductSearch("")
     setLines([newLine()])
   }
 
@@ -132,6 +138,7 @@ export function InvoicesManager({
         status,
         paymentMethod: payment,
         notes: notes.trim() || null,
+        paidAmount: toBase(Math.max(0, Number.parseInt(paidAmount, 10) || 0)),
         lines: cleanLines,
       })
       toast.success(t("inv.created"))
@@ -337,23 +344,68 @@ export function InvoicesManager({
                     <div key={line.key} className="flex items-end gap-2 rounded-lg border border-border p-2">
                       <div className="flex flex-1 flex-col gap-1">
                         <span className="text-xs text-muted-foreground">{t("inv.lineProduct")}</span>
-                        <Select
-                          value={line.productId}
-                          onValueChange={(v) => updateLine(line.key, { productId: v ?? "" })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("inv.lineProduct")}>
-                              {(value: string) => productById.get(value)?.name ?? t("inv.lineProduct")}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {products.map((prod) => (
-                              <SelectItem key={prod.id} value={String(prod.id)} disabled={prod.quantity <= 0}>
-                                {prod.name} — {t("inv.stockLeft", { v: prod.quantity })}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="relative">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={activeProductLine === line.key}
+                            className="h-9 w-full justify-between overflow-hidden font-normal"
+                            onClick={() => {
+                              setActiveProductLine((current) => (current === line.key ? null : line.key))
+                              setProductSearch("")
+                            }}
+                          >
+                            <span className="truncate">{p?.name ?? t("inv.lineProduct")}</span>
+                            <Search className="size-4 shrink-0 text-muted-foreground" />
+                          </Button>
+                          {activeProductLine === line.key && (
+                            <div
+                              role="listbox"
+                              aria-label={t("inv.searchProduct")}
+                              className="absolute left-0 top-full z-50 mt-1 w-[min(22rem,calc(100vw-2rem))] rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg"
+                            >
+                              <div className="relative">
+                                <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                  autoFocus
+                                  value={productSearch}
+                                  onChange={(event) => setProductSearch(event.target.value)}
+                                  placeholder={t("inv.searchProduct")}
+                                  className="h-9 pl-8"
+                                  aria-label={t("inv.searchProduct")}
+                                />
+                              </div>
+                              <div className="mt-2 max-h-56 overflow-y-auto">
+                                {products
+                                  .filter((prod) => prod.name.toLowerCase().includes(productSearch.trim().toLowerCase()))
+                                  .map((prod) => (
+                                    <button
+                                      key={prod.id}
+                                      type="button"
+                                      role="option"
+                                      aria-selected={line.productId === String(prod.id)}
+                                      disabled={prod.quantity <= 0}
+                                      className="flex min-h-11 w-full items-center justify-between rounded-sm px-2 text-left text-sm hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                                      onClick={() => {
+                                        updateLine(line.key, { productId: String(prod.id) })
+                                        setActiveProductLine(null)
+                                        setProductSearch("")
+                                      }}
+                                    >
+                                      <span className="truncate">{prod.name}</span>
+                                      <span className="ml-2 shrink-0 text-xs text-muted-foreground">
+                                        {t("inv.stockLeft", { v: prod.quantity })}
+                                      </span>
+                                    </button>
+                                  ))}
+                                {products.filter((prod) => prod.name.toLowerCase().includes(productSearch.trim().toLowerCase())).length === 0 && (
+                                  <p className="px-2 py-3 text-sm text-muted-foreground">{t("inv.noProductMatch")}</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex w-16 flex-col gap-1">
                         <span className="text-xs text-muted-foreground">{t("inv.lineQty")}</span>
@@ -392,6 +444,18 @@ export function InvoicesManager({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
+                <Label htmlFor="invPaidAmount">{t("inv.paidAmount")}</Label>
+                <Input
+                  id="invPaidAmount"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={paidAmount}
+                  onChange={(e) => setPaidAmount(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <Label>{t("inv.payment")}</Label>
                 <Select value={payment} onValueChange={(v) => setPayment(v ?? PAYMENT_METHODS[0])}>
                   <SelectTrigger>
@@ -427,7 +491,12 @@ export function InvoicesManager({
 
             <div className="flex items-center justify-between rounded-lg bg-muted p-3">
               <span className="text-sm text-muted-foreground">{t("inv.grandTotal")}</span>
-              <span className="text-lg font-semibold">{money(grandTotal)}</span>
+              <div className="text-right">
+                <span className="block text-lg font-semibold">{money(grandTotal)}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {t("inv.remainingAmount")}: {money(Math.max(0, grandTotal - toBase(Number.parseInt(paidAmount, 10) || 0)))}
+                </span>
+              </div>
             </div>
           </div>
 

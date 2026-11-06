@@ -1,4 +1,4 @@
-export type CurrencyCode = "EUR" | "XOF" | "XAF" | "USD"
+export type CurrencyCode = "XOF" | "XAF"
 
 export type CurrencyConfig = {
   code: CurrencyCode
@@ -12,14 +12,6 @@ export type CurrencyConfig = {
 
 // Le Franc CFA (XOF/XAF) a une parité fixe avec l'euro : 1 € = 655,957 FCFA.
 export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
-  EUR: {
-    code: "EUR",
-    symbol: "€",
-    label: { fr: "Euro (€)", en: "Euro (€)" },
-    rateFromEUR: 1,
-    decimals: 2,
-    symbolBefore: false,
-  },
   XOF: {
     code: "XOF",
     symbol: "FCFA",
@@ -36,17 +28,9 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
     decimals: 0,
     symbolBefore: false,
   },
-  USD: {
-    code: "USD",
-    symbol: "$",
-    label: { fr: "Dollar US ($)", en: "US Dollar ($)" },
-    rateFromEUR: 1.08,
-    decimals: 2,
-    symbolBefore: true,
-  },
 }
 
-export const DEFAULT_CURRENCY: CurrencyCode = "EUR"
+export const DEFAULT_CURRENCY: CurrencyCode = "XOF"
 
 export function isCurrencyCode(v: string | undefined | null): v is CurrencyCode {
   return !!v && Object.prototype.hasOwnProperty.call(CURRENCIES, v)
